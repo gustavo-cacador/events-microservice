@@ -22,7 +22,7 @@ public class EventProducer {
         emailDTO.setUserId(user.getUserId());
         emailDTO.setEmailTo(user.getParticipantEmail());
         emailDTO.setSubject("Cadastro realizado com sucesso!");
-        emailDTO.setText(user.getName() + ", seja bem vindo(a)! \nAgradecemos o seu cadastro no " + event.getTitle() + ", " + event.getDescription() +", aproveite o evento no dia: " + event.getDate() + "!");
+        emailDTO.setText(user.getName() + ", seja Bem Vindo(a)! \nAgradecemos o seu cadastro no " + event.getTitle() + ", " + event.getDescription() +". \nAproveite o evento no dia: " + event.getDate() + "! \nEsperamos você lá!");
 
         rabbitTemplate.convertAndSend("", routingKey, emailDTO);
     }
