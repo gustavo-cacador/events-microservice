@@ -3,6 +3,7 @@ package com.gustavo.events_microservice.controllers;
 import com.gustavo.events_microservice.domain.Event;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.dtos.SubscriptionRequestDTO;
+import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
 import com.gustavo.events_microservice.services.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class EventController {
     // no @PathVariable vamos passar o ID do evento, enquanto no corpo da requisição (@RequestBody) vamos passar apenas o email do participante
     // PathVariable = url, RequestBody = json
     @PostMapping("/{eventId}/register")
-    public void registerParticipant(@PathVariable String eventId, @RequestBody SubscriptionRequestDTO subscriptionRequest) {
-        eventService.registerParticipant(eventId, subscriptionRequest.participantEmail(), subscriptionRequest.name());
+    public SubscriptionResponseDTO registerParticipant(@PathVariable String eventId, @RequestBody SubscriptionRequestDTO subscriptionRequest) {
+        return eventService.registerParticipant(eventId, subscriptionRequest.participantEmail(), subscriptionRequest.name());
     }
 }
