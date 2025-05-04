@@ -1,12 +1,13 @@
 package com.gustavo.events_microservice.services;
 
 import com.gustavo.events_microservice.domain.Event;
-import com.gustavo.events_microservice.domain.Subscription;
+import com.gustavo.events_microservice.domain.User;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.exceptions.EventFullException;
 import com.gustavo.events_microservice.exceptions.EventNotFoundException;
+import com.gustavo.events_microservice.producers.EventProducer;
 import com.gustavo.events_microservice.repositories.EventRepository;
-import com.gustavo.events_microservice.repositories.SubscriptionRepository;
+import com.gustavo.events_microservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,8 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
+    private final EventProducer eventProducer;
 
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
@@ -38,7 +40,7 @@ public class EventService {
         return event.getRegisteredParticipants() >= event.getMaxParticipants();
     }
 
-    public void registerParticipant(String eventId, String participantEmail) {
+    public void registerParticipant(String eventId, String participantEmail, String name) {
         var event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         // se numero de participantes for maior ou igual que o máximo permitido de participantes no evento ele retorna o EvenFullException
@@ -47,9 +49,14 @@ public class EventService {
         }
 
         // mas caso n retorne o EventFullException, ele registra o parcitipante no evento
-        var subscription = new Subscription(event, participantEmail);
-        subscriptionRepository.save(subscription);
+        var subscription = new User(event, participantEmail, name);
+        userRepository.save(subscription);
 
+        // atualiza o numero de participantes
         event.setRegisteredParticipants(event.getRegisteredParticipants() + 1);
+        eventRepository.save(event);
+
+        // atualiza o email via rabbitmq
+        eventProducer.publishMessageEmail(subscription, event);
     }
 }
