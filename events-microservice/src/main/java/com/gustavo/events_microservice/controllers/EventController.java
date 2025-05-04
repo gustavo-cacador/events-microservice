@@ -31,6 +31,8 @@ public class EventController {
         return eventService.createEvent(event);
     }
 
+    // no @PathVariable vamos passar o ID do evento, enquanto no corpo da requisição (@RequestBody) vamos passar apenas o email do participante
+    // PathVariable = url, RequestBody = json
     @PostMapping("/{eventId}/register")
     public void registerParticipant(@PathVariable String eventId, @RequestBody SubscriptionRequestDTO subscriptionRequest) {
         eventService.registerParticipant(eventId, subscriptionRequest.participantEmail());
