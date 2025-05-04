@@ -35,6 +35,6 @@ public class EventController {
     // PathVariable = url, RequestBody = json
     @PostMapping("/{eventId}/register")
     public void registerParticipant(@PathVariable String eventId, @RequestBody SubscriptionRequestDTO subscriptionRequest) {
-        eventService.registerParticipant(eventId, subscriptionRequest.participantEmail());
+        eventService.registerParticipant(eventId, subscriptionRequest.participantEmail(), subscriptionRequest.name());
     }
 }
