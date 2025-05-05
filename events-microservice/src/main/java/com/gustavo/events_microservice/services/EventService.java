@@ -37,6 +37,14 @@ public class EventService {
         return eventRepository.findUpcomingEvents(LocalDateTime.now());
     }
 
+    public Event createEvent(EventRequestDTO eventRequest) {
+        if (eventRequest.date().isBefore(LocalDate.now())) {
+            throw new InvalidEventDateException("A data do evento deve ser no futuro.");
+        }
+        var event = new Event(eventRequest);
+        return eventRepository.save(event);
+    }
+
     @Transactional
     public EventRequestDTO updateEvent(String id, EventRequestDTO dto) {
         try {
@@ -47,14 +55,6 @@ public class EventService {
         } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Evento não encontrado.");
         }
-    }
-
-    public Event createEvent(EventRequestDTO eventRequest) {
-        if (eventRequest.date().isBefore(LocalDate.now())) {
-            throw new InvalidEventDateException("A data do evento deve ser no futuro.");
-        }
-        var event = new Event(eventRequest);
-        return eventRepository.save(event);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
