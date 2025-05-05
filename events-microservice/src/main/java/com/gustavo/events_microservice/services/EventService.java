@@ -4,15 +4,16 @@ import com.gustavo.events_microservice.domain.Event;
 import com.gustavo.events_microservice.domain.User;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
-import com.gustavo.events_microservice.exceptions.DuplicateSubscriptionException;
-import com.gustavo.events_microservice.exceptions.EventFullException;
-import com.gustavo.events_microservice.exceptions.EventNotFoundException;
-import com.gustavo.events_microservice.exceptions.InvalidEventDateException;
+import com.gustavo.events_microservice.exceptions.*;
 import com.gustavo.events_microservice.producers.EventProducer;
 import com.gustavo.events_microservice.repositories.EventRepository;
 import com.gustavo.events_microservice.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,12 +27,26 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventProducer eventProducer;
 
+    @Transactional(readOnly = true)
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Event> getUpcomingEvents() {
         return eventRepository.findUpcomingEvents(LocalDateTime.now());
+    }
+
+    @Transactional
+    public EventRequestDTO updateEvent(String id, EventRequestDTO dto) {
+        try {
+            Event entity = eventRepository.getReferenceById(id);
+            copyDtoToEntity(dto, entity);
+            entity = eventRepository.save(entity);
+            return new EventRequestDTO(entity);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Evento não encontrado.");
+        }
     }
 
     public Event createEvent(EventRequestDTO eventRequest) {
@@ -40,6 +55,18 @@ public class EventService {
         }
         var event = new Event(eventRequest);
         return eventRepository.save(event);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void deleteEvent(String id) {
+        if (!eventRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Evento não existe.");
+        } try {
+            eventRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Falha de integridade referencial.");
+        }
+        eventRepository.deleteById(id);
     }
 
     private Boolean isEventFull(Event event) {
@@ -76,5 +103,13 @@ public class EventService {
                 event.getTitle(),
                 event.getDate().toString()
         );
+    }
+
+    private void copyDtoToEntity(EventRequestDTO dto, Event entity) {
+        entity.setDate(dto.date());
+        entity.setDescription(dto.description());
+        entity.setTitle(dto.title());
+        entity.setRegisteredParticipants(dto.registeredParticipants());
+        entity.setMaxParticipants(dto.maxParticipants());
     }
 }

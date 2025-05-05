@@ -7,6 +7,7 @@ import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
 import com.gustavo.events_microservice.services.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,18 @@ public class EventController {
     @GetMapping("/upcoming")
     public List<Event> getUpcomingEvents() {
         return eventService.getUpcomingEvents();
+    }
+
+    @PutMapping(value = "/{eventId}")
+    public ResponseEntity<EventRequestDTO> updateEvent(@PathVariable String eventId, @Valid @RequestBody EventRequestDTO dto) {
+        dto = eventService.updateEvent(eventId, dto);
+        return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping(value = "/{eventId}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable String eventId) {
+        eventService.deleteEvent(eventId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping
