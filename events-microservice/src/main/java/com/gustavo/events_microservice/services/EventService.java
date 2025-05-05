@@ -80,12 +80,13 @@ public class EventService {
         return event.getRegisteredParticipants() >= event.getMaxParticipants();
     }
 
+    @Transactional
     public SubscriptionResponseDTO registerParticipant(String eventId, String participantEmail, String name) {
         var event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         // se numero de participantes for maior ou igual que o máximo permitido de participantes no evento ele retorna o EvenFullException
         if (isEventFull(event)) {
-            throw new EventFullException();
+            throw new EventFullException("O evento já atingiu o número máximo de participantes.");
         }
 
         // verifica se o usuario ja esta inscrito no evento
@@ -100,6 +101,8 @@ public class EventService {
 
         // atualiza o numero de participantes
         event.setRegisteredParticipants(event.getRegisteredParticipants() + 1);
+
+        eventRepository.save(event);
 
         // atualiza o email via rabbitmq
         eventProducer.publishMessageEmail(subscription, event);

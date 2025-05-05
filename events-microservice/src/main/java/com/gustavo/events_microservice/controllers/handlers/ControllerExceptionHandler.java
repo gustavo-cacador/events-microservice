@@ -29,14 +29,14 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(EventFullException.class)
     public ResponseEntity<CustomError> handleEventFull(EventFullException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        CustomError err = new CustomError(Instant.now(), status.value(), "Evento lotado", request.getRequestURI());
+        CustomError err = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationError> handleValidation(MethodArgumentNotValidException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
-        ValidationError err = new ValidationError(Instant.now(), status.value(), "Erro de validação", request.getRequestURI());
+        ValidationError err = new ValidationError(Instant.now(), status.value(), "Dados inválidos", request.getRequestURI());
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
             err.addError(fieldError.getField(), fieldError.getDefaultMessage());
         }
