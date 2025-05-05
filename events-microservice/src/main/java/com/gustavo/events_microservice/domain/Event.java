@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "events")
 @Data
@@ -20,7 +22,7 @@ public class Event {
     private String id;
     private int maxParticipants;
     private int registeredParticipants;
-    private String date;
+    private LocalDate date;
     private String title;
     private String description;
 

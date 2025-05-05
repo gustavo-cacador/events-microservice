@@ -14,7 +14,7 @@ public interface EventRepository extends JpaRepository<Event, String> {
 
     // query para retornar os eventos cuja data seja futura
     // usamos TO_TIMESTAMP para converter a coluna data de String para data/hora
-    @Query(value = "SELECT * FROM events e WHERE TO_TIMESTAMP(e.date, 'dd/MM/yyyy') > :currentDate", nativeQuery = true)
+    @Query(value = "SELECT * FROM events e WHERE e.date > :currentDate", nativeQuery = true)
     List<Event> findUpcomingEvents(@Param("currentDate") LocalDateTime currentDate);
 
     @NonNull
