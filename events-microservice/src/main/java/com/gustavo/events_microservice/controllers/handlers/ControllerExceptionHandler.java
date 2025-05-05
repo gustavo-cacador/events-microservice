@@ -3,7 +3,7 @@ package com.gustavo.events_microservice.controllers.handlers;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.gustavo.events_microservice.dtos.CustomError;
 import com.gustavo.events_microservice.dtos.ValidationError;
-import com.gustavo.events_microservice.exceptions.*;
+import com.gustavo.events_microservice.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
