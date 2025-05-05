@@ -4,14 +4,17 @@ import com.gustavo.events_microservice.domain.Event;
 import com.gustavo.events_microservice.domain.User;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
+import com.gustavo.events_microservice.exceptions.DuplicateSubscriptionException;
 import com.gustavo.events_microservice.exceptions.EventFullException;
 import com.gustavo.events_microservice.exceptions.EventNotFoundException;
+import com.gustavo.events_microservice.exceptions.InvalidEventDateException;
 import com.gustavo.events_microservice.producers.EventProducer;
 import com.gustavo.events_microservice.repositories.EventRepository;
 import com.gustavo.events_microservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,6 +35,9 @@ public class EventService {
     }
 
     public Event createEvent(EventRequestDTO eventRequest) {
+        if (eventRequest.date().isBefore(LocalDate.now())) {
+            throw new InvalidEventDateException("A data do evento deve ser no futuro.");
+        }
         var event = new Event(eventRequest);
         return eventRepository.save(event);
     }
@@ -47,6 +53,12 @@ public class EventService {
         // se numero de participantes for maior ou igual que o máximo permitido de participantes no evento ele retorna o EvenFullException
         if (isEventFull(event)) {
             throw new EventFullException();
+        }
+
+        // verifica se o usuario ja esta inscrito no evento
+        boolean alreadySubscribed = userRepository.existsByEventAndParticipantEmail(event, participantEmail);
+        if (alreadySubscribed) {
+            throw new DuplicateSubscriptionException("Usuário já está cadastrado no evento.");
         }
 
         // mas caso n retorne o EventFullException, ele registra o parcitipante no evento
