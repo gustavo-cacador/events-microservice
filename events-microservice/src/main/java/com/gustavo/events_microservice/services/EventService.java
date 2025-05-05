@@ -51,6 +51,7 @@ public class EventService {
             Event entity = eventRepository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
 
+            // verifica se a nova data do evento n está no passado
             if (entity.getDate().isBefore(LocalDate.now())) {
                 throw new InvalidEventDateException("A data do evento deve ser no futuro.");
             }
