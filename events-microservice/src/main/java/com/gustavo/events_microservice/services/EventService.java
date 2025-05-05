@@ -50,6 +50,11 @@ public class EventService {
         try {
             Event entity = eventRepository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
+
+            if (entity.getDate().isBefore(LocalDate.now())) {
+                throw new InvalidEventDateException("A data do evento deve ser no futuro.");
+            }
+
             entity = eventRepository.save(entity);
             return new EventRequestDTO(entity);
         } catch (EntityNotFoundException e) {
