@@ -15,6 +15,10 @@ public interface EventRepository extends JpaRepository<Event, String> {
     @Query(value = "SELECT * FROM events e WHERE e.date > :currentDate", nativeQuery = true)
     List<Event> findUpcomingEvents(@Param("currentDate") LocalDateTime currentDate);
 
+    @Query("SELECT obj FROM Event obj " +
+            "WHERE UPPER(obj.title) LIKE UPPER(CONCAT('%', :title, '%'))")
+    List<Event> searchByName(String title);
+
     @NonNull
     Optional<Event> findById(@NonNull String id);
 }

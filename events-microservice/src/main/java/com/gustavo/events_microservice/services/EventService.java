@@ -37,6 +37,12 @@ public class EventService {
         return eventRepository.findUpcomingEvents(LocalDateTime.now());
     }
 
+    @Transactional(readOnly = true)
+    public List<EventRequestDTO> searchByName(String title) {
+        List<Event> list = eventRepository.searchByName(title);
+        return list.stream().map(x -> new EventRequestDTO(x)).toList();
+    }
+
     public Event createEvent(EventRequestDTO eventRequest) {
         if (eventRequest.date().isBefore(LocalDate.now())) {
             throw new InvalidEventDateException("A data do evento deve ser no futuro.");

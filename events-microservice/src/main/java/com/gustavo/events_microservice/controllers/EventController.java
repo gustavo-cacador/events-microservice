@@ -29,6 +29,12 @@ public class EventController {
         return eventService.getUpcomingEvents();
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<EventRequestDTO>> searchByName(@RequestParam(name = "title", defaultValue = "") String title) {
+        List<EventRequestDTO> list = eventService.searchByName(title);
+        return ResponseEntity.ok(list);
+    }
+
     @PutMapping(value = "/{eventId}")
     public ResponseEntity<EventRequestDTO> updateEvent(@PathVariable String eventId, @Valid @RequestBody EventRequestDTO dto) {
         dto = eventService.updateEvent(eventId, dto);
