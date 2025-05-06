@@ -40,6 +40,9 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<EventRequestDTO> searchByName(String title) {
         List<Event> list = eventRepository.searchByName(title);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException("Nenhum evento encontrado com o título: " + title);
+        }
         return list.stream().map(x -> new EventRequestDTO(x)).toList();
     }
 
