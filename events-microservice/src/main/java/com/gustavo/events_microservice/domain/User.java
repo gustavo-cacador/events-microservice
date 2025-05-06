@@ -17,15 +17,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID userId;
     private String name;
+    private String telefone;
 
     @ManyToOne
     private Event event;
 
     private String participantEmail;
 
-    public User(Event event, String participantEmail, String name) {
+    public User(Event event, String participantEmail, String name, String telefone) {
         this.event = event;
         this.participantEmail = participantEmail;
         this.name = name;
+        this.telefone = telefone;
     }
 }

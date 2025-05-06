@@ -87,7 +87,7 @@ public class EventService {
     }
 
     @Transactional
-    public SubscriptionResponseDTO registerParticipant(String eventId, String participantEmail, String name) {
+    public SubscriptionResponseDTO registerParticipant(String eventId, String participantEmail, String name, String telefone) {
         var event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         // se numero de participantes for maior ou igual que o máximo permitido de participantes no evento ele retorna o EvenFullException
@@ -102,7 +102,7 @@ public class EventService {
         }
 
         // mas caso n retorne o EventFullException, ele registra o parcitipante no evento
-        var subscription = new User(event, participantEmail, name);
+        var subscription = new User(event, participantEmail, name, telefone);
         userRepository.save(subscription);
 
         // atualiza o numero de participantes
