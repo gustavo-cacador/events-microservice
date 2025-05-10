@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface EventRepository extends JpaRepository<Event, String> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query(value = "SELECT * FROM events e WHERE e.date > :currentDate", nativeQuery = true)
     List<Event> findUpcomingEvents(@Param("currentDate") LocalDateTime currentDate);
@@ -20,5 +20,5 @@ public interface EventRepository extends JpaRepository<Event, String> {
     List<Event> searchByName(String title);
 
     @NonNull
-    Optional<Event> findById(@NonNull String id);
+    Optional<Event> findById(@NonNull Long id);
 }

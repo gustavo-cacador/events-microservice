@@ -1,7 +1,9 @@
 package com.gustavo.events_microservice.services;
 
+import com.gustavo.events_microservice.domain.Category;
 import com.gustavo.events_microservice.domain.Event;
 import com.gustavo.events_microservice.domain.User;
+import com.gustavo.events_microservice.dtos.CategoryDTO;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
 import com.gustavo.events_microservice.producers.EventProducer;
@@ -46,16 +48,18 @@ public class EventService {
         return list.stream().map(x -> new EventRequestDTO(x)).toList();
     }
 
-    public Event createEvent(EventRequestDTO eventRequest) {
-        if (eventRequest.date().isBefore(LocalDate.now())) {
+    public EventRequestDTO createEvent(EventRequestDTO eventRequest) {
+        if (eventRequest.getDate().isBefore(LocalDate.now())) {
             throw new InvalidEventDateException("A data do evento deve ser no futuro.");
         }
-        var event = new Event(eventRequest);
-        return eventRepository.save(event);
+        Event event = new Event();
+        copyDtoToEntity(eventRequest, event);
+        event = eventRepository.save(event);
+        return new EventRequestDTO(event);
     }
 
     @Transactional
-    public EventRequestDTO updateEvent(String id, EventRequestDTO dto) {
+    public EventRequestDTO updateEvent(Long id, EventRequestDTO dto) {
         try {
             Event entity = eventRepository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
@@ -73,7 +77,7 @@ public class EventService {
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void deleteEvent(String id) {
+    public void deleteEvent(Long id) {
         if (!eventRepository.existsById(id)) {
             throw new ResourceNotFoundException("Evento não existe.");
         } try {
@@ -90,7 +94,7 @@ public class EventService {
     }
 
     @Transactional
-    public SubscriptionResponseDTO registerParticipant(String eventId, String participantEmail, String name, String telefone) {
+    public SubscriptionResponseDTO registerParticipant(Long eventId, String participantEmail, String name, String telefone) {
         var event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         // se numero de participantes for maior ou igual que o máximo permitido de participantes no evento ele retorna o EvenFullException
@@ -124,10 +128,17 @@ public class EventService {
     }
 
     private void copyDtoToEntity(EventRequestDTO dto, Event entity) {
-        entity.setDate(dto.date());
-        entity.setDescription(dto.description());
-        entity.setTitle(dto.title());
-        entity.setRegisteredParticipants(dto.registeredParticipants());
-        entity.setMaxParticipants(dto.maxParticipants());
+        entity.setDate(dto.getDate());
+        entity.setDescription(dto.getDescription());
+        entity.setTitle(dto.getTitle());
+        entity.setRegisteredParticipants(dto.getRegisteredParticipants());
+        entity.setMaxParticipants(dto.getMaxParticipants());
+
+        entity.getCategories().clear();
+        for (CategoryDTO categoryDTO : dto.getCategories()) {
+            var category = new Category();
+            category.setId(categoryDTO.getId());
+            entity.getCategories().add(category);
+        }
     }
 }
