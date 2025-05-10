@@ -7,6 +7,7 @@ import com.gustavo.events_microservice.dtos.CategoryDTO;
 import com.gustavo.events_microservice.dtos.EventRequestDTO;
 import com.gustavo.events_microservice.dtos.SubscriptionResponseDTO;
 import com.gustavo.events_microservice.producers.EventProducer;
+import com.gustavo.events_microservice.repositories.CategoryRepository;
 import com.gustavo.events_microservice.repositories.EventRepository;
 import com.gustavo.events_microservice.repositories.UserRepository;
 import com.gustavo.events_microservice.services.exceptions.*;
@@ -28,6 +29,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final EventProducer eventProducer;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     public List<Event> getAllEvents() {
@@ -136,8 +138,8 @@ public class EventService {
 
         entity.getCategories().clear();
         for (CategoryDTO categoryDTO : dto.getCategories()) {
-            var category = new Category();
-            category.setId(categoryDTO.getId());
+            var category = categoryRepository.findById(categoryDTO.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Categoria com id: " + categoryDTO.getId() + ", não encontrado."));
             entity.getCategories().add(category);
         }
     }
